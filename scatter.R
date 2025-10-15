@@ -1,5 +1,7 @@
 source("utils.r")
 
+generate_directories()
+
 spore_data_raw <- read.csv("data/spores.csv")
 spore_data_filtered <- subset(
   spore_data_raw,

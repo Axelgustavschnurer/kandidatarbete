@@ -1,5 +1,16 @@
-# ID's of specimens excluded from all tests
-blacklisted_id_list <- c("L20483", "L04230", "L22236")
+library("ggplot2")
+source("config.r")
+
+# Generate output directories
+
+generate_directories <- function() {
+  for (directory in directories) {
+    if (!dir.exists(directory)) {
+      dir.create(directory, recursive = TRUE)
+      message("Created directory: ", directory)
+    }
+  }
+}
 
 # Convert boolean values in a dataframe to numeric values.
 convert_boolean_numeric <- function(dataframe) {
@@ -57,4 +68,176 @@ generate_jittered_boxplot <- function(
     col = rgb(0, 0, 0),
     add = TRUE
   )
+}
+
+# Generate biplot based on a PCA result.
+generate_biplot <- function(
+  title,
+  df,
+  pca_result,
+  pc_x,
+  pc_y,
+  group_by,
+  group_by_title,
+  group_shape_codes,
+  grouped_only = FALSE,
+  show_labels = TRUE,
+  show_loadings = TRUE,
+  show_loading_labels = TRUE
+) {
+
+  # Get scores from our PCA
+  plot_data <- as.data.frame(pca_result$x)
+
+  # Extract ID's aswell as DNA_ID's and use them to label graphs
+  # TODO: Do not use df here, instead allow passing an argument "labeled_by"
+  # as an array of df columns
+  id_array <- df$ID
+  dna_id_array <- df$DNA
+  combined_label <- ifelse(
+    is.na(dna_id_array) | dna_id_array == "",
+    id_array,
+    paste0(id_array, " (", dna_id_array, ")")
+  )
+  plot_data$label <- combined_label
+
+ 
+  # Allow showing group (in our clase CLADE)
+  # TODO: Might make more sense to just force data to be "group" or "clade"
+  # instead of allowing all groupings
+  plot_data$group <- factor(ifelse(is.na(group_by), "Unknown", group_by))
+  if (grouped_only) {
+    plot_data <- plot_data[plot_data$group != "Unknown", ]
+  }
+
+  # Extract numeric PC indices from the pc_x and pc_y strings, e.g. "PC2" -> 2
+  pc_x_num <- as.numeric(sub("PC", "", pc_x))
+  pc_y_num <- as.numeric(sub("PC", "", pc_y))
+
+  # Dynamically get loadings for the two PCs
+  loadings <- as.data.frame(pca_result$rotation[, c(pc_x_num, pc_y_num)])
+  colnames(loadings) <- c("PCx", "PCy")
+  loadings$variable <- rownames(loadings)
+
+  # Scale loadings
+  arrow_scale <- 5
+  loadings$PCx <- loadings$PCx * pca_result$sdev[pc_x_num] * arrow_scale
+  loadings$PCy <- loadings$PCy * pca_result$sdev[pc_y_num] * arrow_scale
+
+  plot <- ggplot()
+
+  plot <- plot + scale_shape_manual(
+    values = group_shape_codes,
+    name = group_by_title
+  )
+
+  # Conditionally add loading arrows
+  if (show_loadings) {
+    plot <- plot + geom_segment(
+      data = loadings,
+      aes(x = 0, y = 0, xend = .data$PCx, yend = .data$PCy),
+      arrow = arrow(length = unit(0.25, "cm")),
+      color = "gray60"
+    )
+  }
+
+  # Conditionally add loading labels
+  if (show_loading_labels) {
+    plot <- plot + geom_text(
+      data = loadings,
+      aes(
+        x = .data$PCx * 1.1,
+        y = .data$PCy * 1.1,
+        label = .data$variable
+      ),
+      color = "gray20",
+      size = 2
+    )
+  }
+
+  # Conditionally add point labels
+  if (show_labels) {
+    plot <- plot + geom_text(
+      data = plot_data,
+      aes(
+        x = .data[[pc_x]],
+        y = .data[[pc_y]],
+        label = .data$label
+      ),
+      vjust = -1.2,
+      size = 2
+    )
+  }
+
+  # Add group labels
+  plot <- plot + geom_point(
+    data = plot_data,
+    aes(
+      x = .data[[pc_x]],
+      y = .data[[pc_y]],
+      shape = .data$group
+    ),
+    size = 3
+  )
+
+
+  # Final plot adjustments
+  plot +
+    ggtitle(title) +
+    xlab(paste0(
+      pc_x,
+      " (",
+      round(100 * summary(pca_result)$importance[2, pc_x_num], 1),
+      "%)"
+    )) +
+    ylab(paste0(
+      pc_y,
+      " (",
+      round(100 * summary(pca_result)$importance[2, pc_y_num], 1),
+      "%)"
+    )) +
+    theme(
+      panel.background = element_rect(fill = "white"),
+      plot.background = element_rect(fill = "white"),
+      panel.grid.major = element_line(color = "gray90"),
+      panel.grid.minor = element_line(color = "transparent")
+    ) +
+    coord_fixed()
+}
+
+# Calculate contribution of different variables
+# within a given set of principal components.
+generate_pca_contributions <- function(
+  pca_result,
+  principal_components
+) {
+  # Extract specified principal components
+  loadings <- as.data.frame(
+    pca_result$rotation[, principal_components, drop = FALSE]
+  )
+
+  # Square loadings
+  squared_loadings <- loadings^2
+
+  # Calculate percentage contributions
+  contrib_percent <- sweep(
+    squared_loadings,
+    2,
+    colSums(squared_loadings),
+    FUN = "/"
+  ) * 100
+
+  # Add variable names
+  contrib_percent$variable <- rownames(contrib_percent)
+
+  # Calculate total contribution across selected components
+  contrib_percent$total <- rowSums(
+    contrib_percent[, principal_components, drop = FALSE]
+  )
+
+  # Sort by total descending
+  contrib_percent[
+    order(-contrib_percent$total),
+    c(principal_components, "total")
+  ]
 }

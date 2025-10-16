@@ -27,7 +27,7 @@ initial_pca_columns <- c(
   "diameter_max", "disc_max_convex", "amount", "form_regular",
   "form_aggregated", "proper_exciple_width_max", "proper_exciple_flattened",
   "coherency", "areole_crack_regularity", "areole_thickness_regularity",
-  "partially_thin_or_immersed", "thalllus_size", "areole_diamater_max",
+  "partially_thin_or_immersed", "thallus_size", "areole_diamater_max",
   "thallus_thickness_max", "colour", "cyanobacteria", "prothallus",
   "hypothecium_pale", "parasitised"
 )
@@ -47,7 +47,7 @@ pca_columns_anova <- c(
   "paraphyse_top_width_max", "excipulum_cell_width_max",
   "excipulum_cell_length_max", "spore_length_avg", "spore_width_avg",
   "septa_length_avg", "length_over_width", "septa_over_length",
-  "diameter_max", "proper_exciple_width_max", "thalllus_size",
+  "diameter_max", "proper_exciple_width_max", "thallus_size",
   "areole_diamater_max", "thallus_thickness_max"
 )
 

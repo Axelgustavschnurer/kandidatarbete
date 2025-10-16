@@ -1,11 +1,3 @@
-# Codes for shapes representing different clades
-shape_codes <- c(
-  "1" = 16,
-  "2" = 15,
-  "3" = 17,
-  "Unknown" = 5
-)
-
 # Output directories
 directories <- c(
   "output",
@@ -13,6 +5,14 @@ directories <- c(
   "output/tests",
   "output/secondary_pca",
   "output/boxplots"
+)
+
+# Codes for shapes representing different clades
+shape_codes <- c(
+  "1" = 16,
+  "2" = 15,
+  "3" = 17,
+  "Unknown" = 5
 )
 
 # ID's of specimens excluded from all tests
@@ -41,8 +41,8 @@ secondary_pca_columns <- c(
   "form_aggregated", "diameter_max", "spore_length_avg", "amount"
 )
 
-# Columns used in varying tests
-pca_columns_anova <- c(
+# Numerical variables used in ANOVA and t-test
+numeric_columns <- c(
   "hymenium_length", "hypothecium_length",
   "paraphyse_top_width_max", "excipulum_cell_width_max",
   "excipulum_cell_length_max", "spore_length_avg", "spore_width_avg",
@@ -51,13 +51,15 @@ pca_columns_anova <- c(
   "areole_diamater_max", "thallus_thickness_max"
 )
 
-pca_columns_fishers <- c(
+# Binary variables used in Fisher’s
+binary_columns <- c(
   "form_regular", "form_aggregated", "proper_exciple_flattened",
   "coherency", "partially_thin_or_immersed", "cyanobacteria", "prothallus",
   "hypothecium_pale", "parasitised", "areole_crack_regularity", "colour"
 )
 
-pca_columns_kruskal <- c(
+# Ordinal variables used in Kruskal-Wallis and Wilcoxon
+ordinal_columns <- c(
   "paraphyse_branch_frequency", "disc_max_convex", "amount",
   "areole_thickness_regularity"
 )

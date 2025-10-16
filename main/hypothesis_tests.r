@@ -4,37 +4,42 @@
 # Fisher’s exact test,
 # Kruskal-Wallis test
 # Wilcoxon signed-rank test
+# “We used a combination of parametric, non-parametric, and categorical statistical tests to analyze the data.”
 
 library(ggplot2)
 library(dplyr)
 source("functions/utils.r")
 source("config.r")
 
+# Prepare data by removing blacklisted specimens and specimens without a clade.
 caloplaca_data_raw <- read.csv("data/caloplaca_exsecuta.csv")
+caloplaca_data_subset <- caloplaca_data_raw |>
+  subset(!(ID %in% blacklisted_id_list)) |>
+  subset(clade %in% c(1, 2, 3))
 
-# Filter out clades 1, 2, 3
-# Do we want to be doing this ?
-caloplaca_data_raw  <- caloplaca_data_raw[caloplaca_data_raw$clade %in% c(1, 2, 3), ]
+# Convert booleans and remove missing values in a specific set of columns.
+data_anova <- prepare_pca_data(
+  dataframe = caloplaca_data_subset,
+  columns = numeric_columns,
+  convert = TRUE
+)
+data_fishers <- prepare_pca_data(
+  dataframe = caloplaca_data_subset,
+  columns = binary_columns,
+  convert = TRUE
+)
+data_kruskal <- prepare_pca_data(
+  dataframe = caloplaca_data_subset,
+  columns = ordinal_columns,
+  convert = FALSE
+)
 
-pca_data_anova <- caloplaca_data_raw[pca_columns_anova] |>
-  convert_boolean_numeric()
-pca_data_fishers <- caloplaca_data_raw[pca_columns_fishers] |>
-  convert_boolean_numeric()
-pca_data_kruskal <- caloplaca_data_raw[pca_columns_kruskal]
-
-# Add the clade column back
-# TODO: Does this only remove missing clades?
-pca_data_anova$clade <- df$clade
-pca_data_anova <- na.omit(pca_data_anova)
-pca_data_fishers$clade <- df$clade |> na.omit()
-pca_data_kruskal$clade <- df$clade |> na.omit()
-
+# Run tests
 anova_pvalues <- run_anova(pca_data_anova)
 fisher_pvalues <- run_fisher(pca_data_fishers)
 kruskal_pvalues <- run_kruskal(pca_data_kruskal)
 
-
-# 1 vs rest
+ # 1 vs rest
 caloplaca_data_raw$clade_group <- ifelse(caloplaca_data_raw$clade == 1, "Clade1", "Other")
 df_filtered <- caloplaca_data_raw[caloplaca_data_raw$clade %in% c(1, 2, 3), ]
 
@@ -44,7 +49,6 @@ ttest_pvalues <- run_ttest(pca_data_anova)
 
 pca_data_fishers$clade_group <- df$clade_group
 fisher_pvalues_bin <- run_fisher(pca_data_fishers, group_col = "clade_group")
-
 
 pca_data_kruskal$clade_group <- df$clade_group
 wilcox_pvalues <- run_wilcox(pca_data_kruskal)

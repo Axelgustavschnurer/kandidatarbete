@@ -327,3 +327,12 @@ print_pvalues_table <- function(pvalues, title = "P-values") {
   cat(strrep("-", 40), "\n")
 }
 
+# TODO: Rename this function
+# We use it for statistical tests to remove missing values
+# and convert values to booleans if needed
+prepare_pca_data <- function(dataframe, columns, convert = TRUE) {
+  data <- dataframe[columns]
+  if (convert) data <- convert_boolean_numeric(data)
+  data$clade <- dataframe$clade
+  na.omit(data)
+}

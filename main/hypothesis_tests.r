@@ -92,6 +92,40 @@ for (pair in group_pairs) {
 # ------------------------------------------------------------------------------
 
 
+one_vs_rest_results <- list()
+all_clades <- unique(caloplaca_data_subset$clade)
+
+for (current_clade in all_clades) {
+  one_vs_rest_data <- caloplaca_data_subset %>%
+    mutate(group_vs_rest = ifelse(clade == current_clade,
+                                  paste0("clade_", current_clade),
+                                  "rest"))
+
+  # Keep group_vs_rest during prepare_pca_data
+  data_ttest <- prepare_pca_data(one_vs_rest_data,
+                                 columns = c(numeric_columns, "group_vs_rest"),
+                                 convert = TRUE)
+  data_ttest$clade <- NULL # Remove clade column so it’s not tested
+
+  data_fishers <- prepare_pca_data(one_vs_rest_data,
+                                   columns = c(binary_columns, "group_vs_rest"),
+                                   convert = TRUE)
+  data_fishers$clade <- NULL
+
+  data_wilcox <- prepare_pca_data(one_vs_rest_data,
+                                  columns = c(ordinal_columns, "group_vs_rest"),
+                                  convert = FALSE)
+  data_wilcox$clade <- NULL
+
+  # Run tests
+  one_vs_rest_results[[paste0("clade_", current_clade, "_vs_rest")]] <- list(
+    ttest = run_ttest(data_ttest, group_col = "group_vs_rest"),
+    fisher = run_fisher(data_fishers, group_col = "group_vs_rest"),
+    wilcox = run_wilcox(data_wilcox, group_col = "group_vs_rest")
+  )
+}
+one_vs_rest_results
+
 # ------------------------------------------------------------------------------
 #
 # Saving results
@@ -157,6 +191,47 @@ pairwise_df$P_value <- format(pairwise_df$P_value, width = 8, justify = "right")
 write.table(
   pairwise_df,
   file = file.path("output/hypothesis_tests", "pairwise_results.txt"),
+  sep = "\t",
+  row.names = FALSE,
+  quote = FALSE
+)
+
+# One vs rest
+one_vs_rest_list <- list()
+
+for (comparison_name in names(one_vs_rest_results)) {
+  tests <- one_vs_rest_results[[comparison_name]]
+  
+  for (test_name in names(tests)) {
+    df <- data.frame(
+      Variable = names(tests[[test_name]]),
+      Test = test_name,
+      P_value = unlist(tests[[test_name]]),
+      Comparison = comparison_name
+    )
+    one_vs_rest_list[[paste(comparison_name, test_name, sep = "_")]] <- df
+  }
+}
+
+# Combine all 1 vs rest results into one data frame
+one_vs_rest_df <- do.call(rbind, one_vs_rest_list)
+
+# Sort by ascending P-value
+one_vs_rest_df <- one_vs_rest_df[order(one_vs_rest_df$P_value), ]
+
+# Format columns
+one_vs_rest_df$Variable <- format(one_vs_rest_df$Variable, width = 25, justify = "left")
+one_vs_rest_df$Test <- format(one_vs_rest_df$Test, width = 15, justify = "left")
+one_vs_rest_df$Comparison <- format(one_vs_rest_df$Comparison, width = 25, justify = "left")
+one_vs_rest_df$P_value <- format(one_vs_rest_df$P_value, width = 8, justify = "right")
+
+# Format P-values as decimals (e.g., 6 digits after decimal)
+one_vs_rest_df$P_value <- sprintf("%.6f", as.numeric(one_vs_rest_df$P_value))
+
+# Save to text file
+write.table(
+  one_vs_rest_df,
+  file = file.path("output/hypothesis_tests", "one_vs_rest_results.txt"),
   sep = "\t",
   row.names = FALSE,
   quote = FALSE

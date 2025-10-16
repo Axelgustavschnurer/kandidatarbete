@@ -280,4 +280,50 @@ run_kruskal <- function(data, group_col = "clade") {
 
   names(res) <- cols_to_test
   return(res)
-} 
+}
+
+run_ttest <- function(data, group_col = "clade_group") {
+  cols_to_test <- setdiff(names(data), group_col)
+
+  res <- lapply(cols_to_test, function(col) {
+    formula <- as.formula(paste(col, "~", group_col))
+    t.test(formula, data = data)$p.value
+  })
+
+  names(res) <- cols_to_test
+  return(res)
+}
+
+run_wilcox <- function(data, group_col = "clade_group") {
+  cols_to_test <- setdiff(names(data), group_col)
+
+  res <- lapply(cols_to_test, function(col) {
+    formula <- as.formula(paste(col, "~", group_col))
+    wilcox.test(formula, data = data)$p.value
+  })
+
+  names(res) <- cols_to_test
+  return(res)
+}
+
+# TODO: Probably remove this function :)
+print_pvalues_table <- function(pvalues, title = "P-values") {
+
+  if (is.list(pvalues)) {
+    pvalues <- unlist(pvalues)
+  }
+
+  # Sort by p-value
+  sorted <- sort(pvalues)
+
+  cat("\n", title, "\n", sep = "")
+  cat(strrep("-", 40), "\n")
+  cat(sprintf("%-30s %8s\n", "Variable", "P-Value all"))
+  cat(strrep("-", 40), "\n")
+
+  for (i in seq_along(sorted)) {
+    cat(sprintf("%-30s %8.4f\n", names(sorted)[i], sorted[[i]]))
+  }
+  cat(strrep("-", 40), "\n")
+}
+

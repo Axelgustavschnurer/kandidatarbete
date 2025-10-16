@@ -35,41 +35,16 @@ kruskal_pvalues <- run_kruskal(pca_data_kruskal)
 
 
 # 1 vs rest
-df$clade_group <- ifelse(df$clade == 1, "Clade1", "Other")
-df_filtered <- df[df$clade %in% c(1, 2, 3), ]
+caloplaca_data_raw$clade_group <- ifelse(caloplaca_data_raw$clade == 1, "Clade1", "Other")
+df_filtered <- caloplaca_data_raw[caloplaca_data_raw$clade %in% c(1, 2, 3), ]
 
-run_ttest <- function(data) {
-  variables <- intersect(names(data), pca_columns_anova)
-  pvalues <- sapply(variables, function(var) {
-    t.test(data[[var]] ~ data$clade_group)$p.value
-  })
-  return(pvalues)
-}
 
-pca_data_anova$clade_group <- df$clade_group
+pca_data_anova$clade_group <- caloplaca_data_raw$clade_group
 ttest_pvalues <- run_ttest(pca_data_anova)
-
-run_fisher <- function(data, group_col = "clade") {
-  variables <- setdiff(names(data), c(group_col, "clade"))  # exclude both clade_group and clade
-
-  pvalues <- sapply(variables, function(var) {
-    tbl <- table(data[[var]], data[[group_col]])
-    fisher.test(tbl)$p.value
-  })
-
-  return(pvalues)
-}
 
 pca_data_fishers$clade_group <- df$clade_group
 fisher_pvalues_bin <- run_fisher(pca_data_fishers, group_col = "clade_group")
 
-run_wilcox <- function(data) {
-  variables <- intersect(names(data), pca_columns_kruskal)
-  pvalues <- sapply(variables, function(var) {
-    wilcox.test(data[[var]] ~ data$clade_group)$p.value
-  })
-  return(pvalues)
-}
 
 pca_data_kruskal$clade_group <- df$clade_group
 wilcox_pvalues <- run_wilcox(pca_data_kruskal)

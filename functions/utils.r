@@ -241,3 +241,43 @@ generate_pca_contributions <- function(
     c(principal_components, "total")
   ]
 }
+
+# Tests
+run_anova <- function(data, group_col = "clade") {
+  cols_to_test <- setdiff(names(data), group_col)
+
+  res <- lapply(cols_to_test, function(col) {
+    formula <- as.formula(paste(col, "~", group_col))
+    model <- aov(formula, data = data)
+    summary(model)[[1]][["Pr(>F)"]][1]  # extract p-value
+  })
+
+  names(res) <- cols_to_test
+  return(res)
+}
+
+# For contingency tables with smaller sample sizes,
+# a Fisher's exact test is used instead.
+run_fisher <- function(data, group_col = "clade") {
+  cols_to_test <- setdiff(names(data), group_col)
+
+  res <- lapply(cols_to_test, function(col) {
+    tab <- table(data[[col]], data[[group_col]]) 
+    fisher.test(tab)$p.value
+  })
+
+  names(res) <- cols_to_test
+  return(res)
+}
+
+run_kruskal <- function(data, group_col = "clade") {
+  cols_to_test <- setdiff(names(data), group_col)
+
+  res <- lapply(cols_to_test, function(col) {
+    formula <- as.formula(paste(col, "~", group_col))
+    kruskal.test(formula, data = data)$p.value
+  })
+
+  names(res) <- cols_to_test
+  return(res)
+} 

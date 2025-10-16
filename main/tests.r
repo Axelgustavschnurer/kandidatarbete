@@ -1,56 +1,37 @@
 # TODO: Rename this file
+# ANOVA
+# Student’s t-test
+# Fisher’s exact test,
+# Kruskal-Wallis test
+# Wilcoxon signed-rank test
 
 library(ggplot2)
 library(dplyr)
-source("scripts/utils.R")
+source("functions/utils.r")
 source("config.r")
 
-df <- read.csv("data/caloplaca_exsecuta.csv")
+caloplaca_data_raw <- read.csv("data/caloplaca_exsecuta.csv")
 
 # Filter out clades 1, 2, 3
 # Do we want to be doing this ?
-df <- df[df$clade %in% c(1, 2, 3), ]
+caloplaca_data_raw  <- caloplaca_data_raw[caloplaca_data_raw$clade %in% c(1, 2, 3), ]
 
-pca_data_anova <- df[pca_columns_anova] |>
+pca_data_anova <- caloplaca_data_raw[pca_columns_anova] |>
   convert_boolean_numeric()
-pca_data_fishers <- df[pca_columns_fishers] |>
+pca_data_fishers <- caloplaca_data_raw[pca_columns_fishers] |>
   convert_boolean_numeric()
-pca_data_kruskal <- df[pca_columns_kruskal]
+pca_data_kruskal <- caloplaca_data_raw[pca_columns_kruskal]
 
 # Add the clade column back
 # TODO: Does this only remove missing clades?
-pca_data_anova$clade <- df$clade |> na.omit()
+pca_data_anova$clade <- df$clade
+pca_data_anova <- na.omit(pca_data_anova)
 pca_data_fishers$clade <- df$clade |> na.omit()
 pca_data_kruskal$clade <- df$clade |> na.omit()
 
 anova_pvalues <- run_anova(pca_data_anova)
 fisher_pvalues <- run_fisher(pca_data_fishers)
 kruskal_pvalues <- run_kruskal(pca_data_kruskal)
-
-print_pvalues_table <- function(pvalues, title = "P-values") {
-
-  if (is.list(pvalues)) {
-    pvalues <- unlist(pvalues)
-  }
-
-  # Sort by p-value
-  sorted <- sort(pvalues)
-
-  cat("\n", title, "\n", sep = "")
-  cat(strrep("-", 40), "\n")
-  cat(sprintf("%-30s %8s\n", "Variable", "P-Value all"))
-  cat(strrep("-", 40), "\n")
-
-  for (i in seq_along(sorted)) {
-    cat(sprintf("%-30s %8.4f\n", names(sorted)[i], sorted[[i]]))
-  }
-  cat(strrep("-", 40), "\n")
-}
-
-print_pvalues_table(anova_pvalues, "ANOVA P-Values")
-print_pvalues_table(fisher_pvalues, "Fisher's Exact Test P-Values")
-print_pvalues_table(kruskal_pvalues, "Kruskal-Wallis P-Values")
-
 
 
 # 1 vs rest

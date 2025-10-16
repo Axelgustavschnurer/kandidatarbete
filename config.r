@@ -31,3 +31,11 @@ initial_pca_columns <- c(
   "thallus_thickness_max", "colour", "cyanobacteria", "prothallus",
   "hypothecium_pale", "parasitised"
 )
+
+# Characters used in our secondary PCA, TODO: We should the characters here :)
+# Form regular instead of hypothecium length might be a contender...
+secondary_pca_columns <- c(
+  "septa_over_length", "coherency", "spore_width_avg", "coherency",
+  "partially_thin_or_immersed", "hypothecium_length", "length_over_width",
+  "form_aggregated", "diameter_max", "spore_length_avg", "amount"
+)

@@ -1,4 +1,4 @@
-source("utils.r")
+source("functions/utils.r")
 
 generate_directories()
 

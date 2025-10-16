@@ -4,7 +4,7 @@
 # 4. Generate output (Save text to /output/intial_pca)
 
 library(psych)
-source("utils.r")
+source("functions/utils.r")
 source("config.r")
 
 generate_directories()

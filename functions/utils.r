@@ -254,16 +254,20 @@ run_anova <- function(data, group_col = "clade") {
 
   names(res) <- cols_to_test
   return(res)
-}
+} 
 
-# For contingency tables with smaller sample sizes,
-# a Fisher's exact test is used instead.
 run_fisher <- function(data, group_col = "clade") {
   cols_to_test <- setdiff(names(data), group_col)
 
   res <- lapply(cols_to_test, function(col) {
-    tab <- table(data[[col]], data[[group_col]]) 
-    fisher.test(tab)$p.value
+    tab <- table(data[[col]], data[[group_col]])
+
+    # Check if the table has at least 2 rows and 2 columns
+    if (all(dim(tab) >= 2)) {
+      fisher.test(tab)$p.value
+    } else {
+      NA  # not enough data to run test
+    }
   })
 
   names(res) <- cols_to_test
@@ -282,7 +286,7 @@ run_kruskal <- function(data, group_col = "clade") {
   return(res)
 }
 
-run_ttest <- function(data, group_col = "clade_group") {
+run_ttest <- function(data, group_col = "clade") {
   cols_to_test <- setdiff(names(data), group_col)
 
   res <- lapply(cols_to_test, function(col) {
@@ -294,7 +298,7 @@ run_ttest <- function(data, group_col = "clade_group") {
   return(res)
 }
 
-run_wilcox <- function(data, group_col = "clade_group") {
+run_wilcox <- function(data, group_col = "clade") {
   cols_to_test <- setdiff(names(data), group_col)
 
   res <- lapply(cols_to_test, function(col) {

@@ -18,6 +18,14 @@ shape_codes <- c(
 # ID's of specimens excluded from all tests
 blacklisted_id_list <- c("L20483", "L04230", "L22236")
 
+# Possible clade combinations
+# TODO: Rename to clade combinations
+group_pairs <- list(
+  c(1, 2),
+  c(1, 3),
+  c(2, 3)
+)
+
 # Characters used in our inital PCA
 initial_pca_columns <- c(
   "hymenium_length", "hypothecium_length", "paraphyse_branch_frequency",

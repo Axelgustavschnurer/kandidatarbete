@@ -13,11 +13,18 @@ source("config.r")
 
 # Prepare data by removing blacklisted specimens and specimens without a clade.
 caloplaca_data_raw <- read.csv("data/caloplaca_exsecuta.csv")
+
+# ------------------------------------------------------------------------------
+#
+# Tests running on all vs all
+#
+# ------------------------------------------------------------------------------
+
 caloplaca_data_subset <- caloplaca_data_raw |>
   subset(!(ID %in% blacklisted_id_list)) |>
   subset(clade %in% c(1, 2, 3))
 
-# Convert booleans and remove missing values in a specific set of columns.
+# Convert booleans and remove missing values for a specific set of columns.
 data_anova <- prepare_pca_data(
   dataframe = caloplaca_data_subset,
   columns = numeric_columns,
@@ -39,51 +46,50 @@ anova_pvalues <- run_anova(pca_data_anova)
 fisher_pvalues <- run_fisher(pca_data_fishers)
 kruskal_pvalues <- run_kruskal(pca_data_kruskal)
 
- # 1 vs rest
-caloplaca_data_raw$clade_group <- ifelse(caloplaca_data_raw$clade == 1, "Clade1", "Other")
-df_filtered <- caloplaca_data_raw[caloplaca_data_raw$clade %in% c(1, 2, 3), ]
+# ------------------------------------------------------------------------------
+#
+# Tests running one vs one
+#
+# ------------------------------------------------------------------------------
 
+# Run tests on the different clades against each other
+pairwise_results <- list()
+for (pair in group_pairs) {
+  # Subset only the two groups
+  pair_data <- caloplaca_data_subset %>%
+    subset(clade %in% pair)
 
-pca_data_anova$clade_group <- caloplaca_data_raw$clade_group
-ttest_pvalues <- run_ttest(pca_data_anova)
+  pair_name <- paste0("clade_", pair[1], "_vs_", pair[2]) # Formatting purposes
 
-pca_data_fishers$clade_group <- df$clade_group
-fisher_pvalues_bin <- run_fisher(pca_data_fishers, group_col = "clade_group")
+  # Convert booleans and remove missing values for a specific set of columns.
+  data_ttest <- prepare_pca_data(
+    dataframe = pair_data,
+    columns = numeric_columns,
+    convert = TRUE
+  )
+  data_wilcox <- prepare_pca_data(
+    dataframe = pair_data,
+    columns = ordinal_columns,
+    convert = FALSE
+  )
+  data_fisher <- prepare_pca_data(
+    dataframe = pair_data,
+    columns = binary_columns,
+    convert = TRUE
+  )
 
-pca_data_kruskal$clade_group <- df$clade_group
-wilcox_pvalues <- run_wilcox(pca_data_kruskal)
+  # Run tests
+  pairwise_results[[pair_name]] <- list(
+    ttest = run_ttest(data_ttest, group_col = "clade"),
+    wilcox = run_wilcox(data_wilcox, group_col = "clade"),
+    fisher = run_fisher(data_fisher, group_col = "clade")
+  )
+}
 
-print_pvalues_table(ttest_pvalues, "T-Test P-Values (Clade 1 vs Others)")
-print_pvalues_table(fisher_pvalues_bin, "Fisher's Exact Test P-Values (Clade 1 vs Others)")
-print_pvalues_table(wilcox_pvalues, "Wilcoxon P-Values (Clade 1 vs Others)")
+# ------------------------------------------------------------------------------
+#
+# Tests running one vs rest
+#
+# ------------------------------------------------------------------------------
 
-#2 vs 3
-# Filter data to only include clade 2 and clade 3
-df_clade_2_3 <- df[df$clade %in% c(2, 3), ]
-
-# Create a clade_group variable for 2 vs 3 comparison
-df_clade_2_3$clade_group <- ifelse(df_clade_2_3$clade == 2, "Clade2", "Clade3")
-
-# Subset PCA datasets accordingly
-pca_data_anova_2_3 <- df_clade_2_3[pca_columns_anova] |> convert_boolean_numeric()
-pca_data_fishers_2_3 <- df_clade_2_3[pca_columns_fishers] |> convert_boolean_numeric()
-pca_data_kruskal_2_3 <- df_clade_2_3[pca_columns_kruskal]
-
-# Add clade_group to PCA datasets
-pca_data_anova_2_3$clade_group <- df_clade_2_3$clade_group
-pca_data_fishers_2_3$clade_group <- df_clade_2_3$clade_group
-pca_data_kruskal_2_3$clade_group <- df_clade_2_3$clade_group
-
-# Run t-tests for clade 2 vs clade 3
-ttest_pvalues_2_3 <- run_ttest(pca_data_anova_2_3)
-
-# Run Fisher's exact test for clade 2 vs clade 3
-fisher_pvalues_bin_2_3 <- run_fisher(pca_data_fishers_2_3, group_col = "clade_group")
-
-# Run Wilcoxon test for clade 2 vs clade 3
-wilcox_pvalues_2_3 <- run_wilcox(pca_data_kruskal_2_3)
-
-# Print the p-values tables
-print_pvalues_table(ttest_pvalues_2_3, "T-Test P-Values (Clade 2 vs Clade 3)")
-print_pvalues_table(fisher_pvalues_bin_2_3, "Fisher's Exact Test P-Values (Clade 2 vs Clade 3)")
-print_pvalues_table(wilcox_pvalues_2_3, "Wilcoxon P-Values (Clade 2 vs Clade 3)")
+ 

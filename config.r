@@ -34,8 +34,30 @@ initial_pca_columns <- c(
 
 # Characters used in our secondary PCA, TODO: We should the characters here :)
 # Form regular instead of hypothecium length might be a contender...
+# septa_length_avg seems to do good in place of amount
 secondary_pca_columns <- c(
   "septa_over_length", "coherency", "spore_width_avg", "coherency",
   "partially_thin_or_immersed", "hypothecium_length", "length_over_width",
   "form_aggregated", "diameter_max", "spore_length_avg", "amount"
+)
+
+# Columns used in varying tests
+pca_columns_anova <- c(
+  "hymenium_length", "hypothecium_length",
+  "paraphyse_top_width_max", "excipulum_cell_width_max",
+  "excipulum_cell_length_max", "spore_length_avg", "spore_width_avg",
+  "septa_length_avg", "length_over_width", "septa_over_length",
+  "diameter_max", "proper_exciple_width_max", "thalllus_size",
+  "areole_diamater_max", "thallus_thickness_max"
+)
+
+pca_columns_fishers <- c(
+  "form_regular", "form_aggregated", "proper_exciple_flattened",
+  "coherency", "partially_thin_or_immersed", "cyanobacteria", "prothallus",
+  "hypothecium_pale", "parasitised", "areole_crack_regularity", "colour"
+)
+
+pca_columns_kruskal <- c(
+  "paraphyse_branch_frequency", "disc_max_convex", "amount",
+  "areole_thickness_regularity"
 )

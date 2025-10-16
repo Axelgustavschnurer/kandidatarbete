@@ -26,7 +26,7 @@ generate_biplot(
   df = caloplaca_data_subset,
   pca_result = pca_result,
   pc_x = "PC1",
-  pc_y = "PC2",
+  pc_y = "PC3",
   group_by_title = "Clade",
   group_by = caloplaca_data_subset$clade,
   group_shape_codes = shape_codes,
@@ -36,5 +36,5 @@ generate_biplot(
   show_loading_labels = TRUE
 )
 
-contrib_output <- generate_pca_contributions(pca_result, c("PC1", "PC2", "PC3"))
+contrib_output <- generate_pca_contributions(pca_result, c("PC1", "PC3"))
 contrib_output

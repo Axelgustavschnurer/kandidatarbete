@@ -254,8 +254,12 @@ run_anova <- function(data, group_col = "clade") {
 
   names(res) <- cols_to_test
   return(res)
-} 
+}
 
+# Only the fisher function deals with invalid values.
+# This is because it was the only relevant place to deal with them
+# for this project.
+# For future use all functions should be written to handle this case.
 run_fisher <- function(data, group_col = "clade") {
   cols_to_test <- setdiff(names(data), group_col)
 

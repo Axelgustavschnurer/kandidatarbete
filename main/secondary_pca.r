@@ -21,12 +21,13 @@ caloplaca_data_filtered <- caloplaca_data_subset |>
 
 pca_result <- prcomp(caloplaca_data_filtered, center = TRUE, scale. = TRUE)
 
+png("output/secondary_pca/pca_biplot.png", width = 800, height = 800)
 generate_biplot(
   title = "PCA Biplot: PC 1 VS PC 2",
   df = caloplaca_data_subset,
   pca_result = pca_result,
   pc_x = "PC1",
-  pc_y = "PC3",
+  pc_y = "PC2",
   group_by_title = "Clade",
   group_by = caloplaca_data_subset$clade,
   group_shape_codes = shape_codes,
@@ -35,6 +36,10 @@ generate_biplot(
   show_loadings = TRUE,
   show_loading_labels = TRUE
 )
+dev.off()
 
-contrib_output <- generate_pca_contributions(pca_result, c("PC1", "PC3"))
-contrib_output
+contrib_output <- generate_pca_contributions(pca_result, c("PC1", "PC2"))
+capture.output(
+  contrib_output,
+  file = "output/secondary_pca/pca_contributions.txt"
+)

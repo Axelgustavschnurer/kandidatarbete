@@ -9,6 +9,8 @@ library(dplyr)
 source("functions/utils.r")
 source("config.r")
 
+generate_directories()
+
 # Prepare data by removing blacklisted specimens and specimens without a clade.
 caloplaca_data_raw <- read.csv("data/caloplaca_exsecuta.csv")
 

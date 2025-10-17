@@ -40,13 +40,12 @@ initial_pca_columns <- c(
   "hypothecium_pale", "parasitised"
 )
 
-# Characters used in our secondary PCA, TODO: We should the characters here :)
-# Form regular instead of hypothecium length might be a contender...
-# septa_length_avg seems to do good in place of amount
+# Characters used in our secondary PCA
 secondary_pca_columns <- c(
-  "septa_over_length", "coherency", "spore_width_avg", "coherency",
-  "partially_thin_or_immersed", "hypothecium_length", "length_over_width",
-  "form_aggregated", "diameter_max", "spore_length_avg", "amount"
+  "spore_width_avg", "septa_over_length", "length_over_width",
+  "spore_length_avg", "partially_thin_or_immersed", "areole_diamater_max",
+  "areole_crack_regularity", "form_regular", "form_aggregated",
+  "amount"
 )
 
 # Numerical variables used in ANOVA and t-test

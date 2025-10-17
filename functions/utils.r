@@ -70,7 +70,6 @@ generate_jittered_boxplot <- function(
   )
 }
 
-# Generate biplot based on a PCA result.
 generate_biplot <- function(
   title,
   df,
@@ -86,12 +85,10 @@ generate_biplot <- function(
   show_loading_labels = TRUE
 ) {
 
-  # Get scores from our PCA
+  # Get scores from PCA
   plot_data <- as.data.frame(pca_result$x)
 
-  # Extract ID's aswell as DNA_ID's and use them to label graphs
-  # TODO: Do not use df here, instead allow passing an argument "labeled_by"
-  # as an array of df columns
+  # Create labels
   id_array <- df$ID
   dna_id_array <- df$DNA
   combined_label <- ifelse(
@@ -101,36 +98,33 @@ generate_biplot <- function(
   )
   plot_data$label <- combined_label
 
-  # Allow showing group (in our clase CLADE)
-  # TODO: Might make more sense to just force data to be "group" or "clade"
-  # instead of allowing all groupings
+  # Grouping
   plot_data$group <- factor(ifelse(is.na(group_by), "Unknown", group_by))
   if (grouped_only) {
     plot_data <- plot_data[plot_data$group != "Unknown", ]
   }
 
-  # Extract numeric PC indices from the pc_x and pc_y strings, e.g. "PC2" -> 2
+  # Extract numeric PC indices
   pc_x_num <- as.numeric(sub("PC", "", pc_x))
   pc_y_num <- as.numeric(sub("PC", "", pc_y))
 
-  # Dynamically get loadings for the two PCs
+  # Loadings
   loadings <- as.data.frame(pca_result$rotation[, c(pc_x_num, pc_y_num)])
   colnames(loadings) <- c("PCx", "PCy")
   loadings$variable <- rownames(loadings)
 
   # Scale loadings
-  arrow_scale <- 5
+  arrow_scale <- 4
   loadings$PCx <- loadings$PCx * pca_result$sdev[pc_x_num] * arrow_scale
   loadings$PCy <- loadings$PCy * pca_result$sdev[pc_y_num] * arrow_scale
 
-  plot <- ggplot()
+  plot <- ggplot() +
+    scale_shape_manual(
+      values = group_shape_codes,
+      name = group_by_title
+    )
 
-  plot <- plot + scale_shape_manual(
-    values = group_shape_codes,
-    name = group_by_title
-  )
-
-  # Conditionally add loading arrows
+  # Add loading arrows
   if (show_loadings) {
     plot <- plot + geom_segment(
       data = loadings,
@@ -140,7 +134,7 @@ generate_biplot <- function(
     )
   }
 
-  # Conditionally add loading labels
+  # Add loading labels
   if (show_loading_labels) {
     plot <- plot + geom_text(
       data = loadings,
@@ -154,7 +148,7 @@ generate_biplot <- function(
     )
   }
 
-  # Conditionally add point labels
+  # Add point labels
   if (show_labels) {
     plot <- plot + geom_text(
       data = plot_data,
@@ -168,7 +162,7 @@ generate_biplot <- function(
     )
   }
 
-  # Add group labels
+  # Add points
   plot <- plot + geom_point(
     data = plot_data,
     aes(
@@ -179,6 +173,15 @@ generate_biplot <- function(
     size = 3
   )
 
+  # Centering at 0,0: symmetric axis limits
+  x_range <- range(plot_data[[pc_x]], 0)
+  y_range <- range(plot_data[[pc_y]], 0)
+  x_max <- max(abs(x_range))
+  y_max <- max(abs(y_range))
+
+  margin_abs <- 0.5  # Margin for border
+  x_lim_expanded <- c(-x_max - margin_abs, x_max + margin_abs)
+  y_lim_expanded <- c(-y_max - margin_abs, y_max + margin_abs)
 
   # Final plot adjustments
   plot +
@@ -200,17 +203,12 @@ generate_biplot <- function(
       plot.background = element_rect(fill = "white"),
       panel.grid.major = element_line(color = "gray90"),
       panel.grid.minor = element_line(color = "transparent"),
-
-      # Title: increase font size, bold, center
       plot.title = element_text(size = 16, hjust = 0.5, margin = margin(b = 24)),
-
-      # Axis labels: increase font size
       axis.title.x = element_text(size = 14),
       axis.title.y = element_text(size = 14),
-
-      panel.border = element_rect(color = "gray80", fill = NA, linewidth = 1),
+      panel.border = element_rect(color = "gray70", fill = NA, linewidth = 1)
     ) +
-    coord_fixed()
+    coord_fixed(xlim = x_lim_expanded, ylim = y_lim_expanded)
 }
 
 # Calculate contribution of different variables

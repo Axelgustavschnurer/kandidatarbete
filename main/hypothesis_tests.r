@@ -124,7 +124,7 @@ for (current_clade in all_clades) {
     wilcox = run_wilcox(data_wilcox, group_col = "group_vs_rest")
   )
 }
-one_vs_rest_results
+
 
 # ------------------------------------------------------------------------------
 #
@@ -132,7 +132,7 @@ one_vs_rest_results
 #
 # ------------------------------------------------------------------------------
 
-# Format and save results 
+# Format and save results
 # All vs all results
 all_vs_all_df <- data.frame(
   Variable = c(names(anova_pvalues), names(fisher_pvalues), names(kruskal_pvalues)),

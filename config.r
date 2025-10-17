@@ -2,7 +2,7 @@
 directories <- c(
   "output",
   "output/initial_pca",
-  "output/tests",
+  "output/hypothesis_tests",
   "output/secondary_pca",
   "output/boxplots"
 )

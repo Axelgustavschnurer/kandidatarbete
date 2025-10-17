@@ -20,6 +20,11 @@ spore_widths_long <- data.frame(
   width = as.vector(t(spore_widths[, width_columns]))
 )
 
+png(
+  "output/boxplots/jittered_boxplot_spore_width.png",
+  width = 800,
+  height = 800
+)
 generate_jittered_boxplot(
   spore_widths_long,
   clade,
@@ -28,3 +33,4 @@ generate_jittered_boxplot(
   "Spore widths",
   "Spore widths by clade"
 )
+dev.off()

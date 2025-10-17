@@ -19,19 +19,19 @@ caloplaca_data_filtered <- caloplaca_data_subset |>
   convert_boolean_numeric() |>
   convert_na_mean()
 
-png("output/initial_pca/parallel_analysis_scree.png", width = 800, height = 600)
+png("output/initial_pca/parallel_analysis_scree.png", width = 8000, height = 6000, res = 900)
 fa.parallel(
   caloplaca_data_filtered,
   fa = "pc",
-  n.iter = 100, # TODO: check if this should be higher
+  n.iter = 100,
   show.legend = TRUE,
-  main = "Parallel Analysis Scree Plot"
+  main = "Parallel analysis scree plot",
 )
 dev.off()
 
 pca_result <- prcomp(caloplaca_data_filtered, center = TRUE, scale. = TRUE)
 
-png("output/initial_pca/pca_biplot.png", width = 800, height = 800)
+png("output/initial_pca/pca_biplot.png", width = 8000, height = 8000, res = 900)
 generate_biplot(
   title = "Initial PCA",
   df = caloplaca_data_subset,

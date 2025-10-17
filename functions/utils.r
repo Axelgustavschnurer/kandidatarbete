@@ -199,7 +199,16 @@ generate_biplot <- function(
       panel.background = element_rect(fill = "white"),
       plot.background = element_rect(fill = "white"),
       panel.grid.major = element_line(color = "gray90"),
-      panel.grid.minor = element_line(color = "transparent")
+      panel.grid.minor = element_line(color = "transparent"),
+
+      # Title: increase font size, bold, center
+      plot.title = element_text(size = 16, hjust = 0.5, margin = margin(b = 24)),
+
+      # Axis labels: increase font size
+      axis.title.x = element_text(size = 14),
+      axis.title.y = element_text(size = 14),
+
+      panel.border = element_rect(color = "gray80", fill = NA, linewidth = 1),
     ) +
     coord_fixed()
 }

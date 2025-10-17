@@ -101,7 +101,6 @@ generate_biplot <- function(
   )
   plot_data$label <- combined_label
 
- 
   # Allow showing group (in our clase CLADE)
   # TODO: Might make more sense to just force data to be "group" or "clade"
   # instead of allowing all groupings

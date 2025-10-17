@@ -23,7 +23,7 @@ pca_result <- prcomp(caloplaca_data_filtered, center = TRUE, scale. = TRUE)
 
 png("output/initial_pca/pca_biplot.png", width = 800, height = 800)
 generate_biplot(
-  title = "PCA Biplot: PC 1 VS PC 2",
+  title = "Initial PCA",
   df = caloplaca_data_subset,
   pca_result = pca_result,
   pc_x = "PC1",

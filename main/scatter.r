@@ -3,6 +3,10 @@ source("config.r")
 
 generate_directories()
 
+#--------------------------------------
+# Generate boxplots from spore data
+#--------------------------------------
+
 spore_data_raw <- read.csv("data/spores.csv")
 spore_data_filtered <- subset(
   spore_data_raw,
@@ -36,6 +40,10 @@ generate_jittered_boxplot(
 )
 dev.off()
 
+#--------------------------------------
+# Generate barcharts from caloplaca data
+#--------------------------------------
+
 caloplaca_data_raw <- read.csv("data/caloplaca_exsecuta.csv")
 
 caloplaca_data_subset <- subset(
@@ -44,26 +52,33 @@ caloplaca_data_subset <- subset(
 )
 
 caloplaca_data_filtered <- caloplaca_data_subset |>
-  convert_boolean_numeric() |>
-  subset(!is.na(partially_thin_or_immersed))
+  convert_boolean_numeric()
+
 
 # Example data
-df <- data.frame(
-  clade = caloplaca_data_filtered$clade,
-  value = caloplaca_data_filtered$partially_thin_or_immersed
-)
-df
-# Save output
-png("output/boxplots/barchart.png",
-    width = 800, height = 800)
+for (col_name in boxplot_booleans) {
 
-generate_true_false_barchart(
-  data = df,
-  group_var = clade,
-  value = value,
-  x_axis_label = "Clade",
-  y_axis_label = "Count of Values",
-  title = "Presence/Absence of partially thin or immersed thallus by Clade"
-)
+  # Remove rows where current column is NA
+  df <- caloplaca_data_filtered[!is.na(caloplaca_data_filtered[[col_name]]), ]
 
-dev.off()
+  # Create a small dataframe with clade + current column
+  plot_df <- data.frame(
+    clade = df$clade,
+    value = df[[col_name]]
+  )
+
+  # Construct output filename
+  filename <- paste0("output/boxplots/barchart_", col_name, ".png")
+
+  # Save plot
+  png(filename, width = 800, height = 800)
+  generate_true_false_barchart(
+    data = plot_df,
+    group_var = clade,
+    value = value,
+    x_axis_label = "Clade",
+    y_axis_label = "Count",
+    title = paste("Presence/Absence of", col_name, "by Clade")
+  )
+  dev.off()
+}

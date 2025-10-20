@@ -88,7 +88,7 @@ generate_true_false_barchart <- function(
   # Count FALSE (0) per group
   false_counts <- tapply(data[[value_name]] == 0, data[[group_name]], sum, na.rm = TRUE)
 
-  counts <- rbind(`True (1)` = true_counts, `False (0)` = false_counts)
+  counts <- rbind(`True` = true_counts, `False` = false_counts)
   
   # Generate barplot
   barplot(

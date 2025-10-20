@@ -70,6 +70,42 @@ generate_jittered_boxplot <- function(
   )
 }
 
+# Generates a barchart plot for different clades
+generate_true_false_barchart <- function(
+  data,
+  group_var,
+  value_var,
+  x_axis_label,
+  y_axis_label,
+  title
+) {
+  # Capture variable names properly
+  group_name <- deparse(substitute(group_var))
+  value_name <- deparse(substitute(value_var))
+
+  # Count TRUE (1) per group
+  true_counts <- tapply(data[[value_name]] == 1, data[[group_name]], sum, na.rm = TRUE)
+  # Count FALSE (0) per group
+  false_counts <- tapply(data[[value_name]] == 0, data[[group_name]], sum, na.rm = TRUE)
+
+  counts <- rbind(`True (1)` = true_counts, `False (0)` = false_counts)
+  
+  # Generate barplot
+  barplot(
+    counts,
+    beside = TRUE,  # set to FALSE for stacked bars
+    col = c("#4CAF50", "#F44336"), # green/red for true/false
+    border = "gray30",
+    main = title,
+    xlab = x_axis_label,
+    ylab = y_axis_label,
+    legend.text = TRUE,
+    args.legend = list(x = "topright", bty = "n")
+  )
+}
+
+
+
 generate_biplot <- function(
   title,
   df,

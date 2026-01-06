@@ -215,7 +215,7 @@ generate_biplot <- function(
   x_max <- max(abs(x_range))
   y_max <- max(abs(y_range))
 
-  margin_abs <- 0.5  # Margin for border
+  margin_abs <- 0  # Margin for border
   x_lim_expanded <- c(-x_max - margin_abs, x_max + margin_abs)
   y_lim_expanded <- c(-y_max - margin_abs, y_max + margin_abs)
 

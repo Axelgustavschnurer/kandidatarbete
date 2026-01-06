@@ -23,11 +23,11 @@ pca_result <- prcomp(caloplaca_data_filtered, center = TRUE, scale. = TRUE)
 
 png("output/secondary_pca/pca_biplot.png",  width = 8000, height = 8000, res = 900)
 generate_biplot(
-  title = "Sekundär PCA",
+  title = "Secondary PCA - PC1 against PC2",
   df = caloplaca_data_subset,
   pca_result = pca_result,
-  pc_x = "PC2",
-  pc_y = "PC3",
+  pc_x = "PC1",
+  pc_y = "PC2",
   group_by_title = "Clade",
   group_by = caloplaca_data_subset$clade,
   group_shape_codes = shape_codes,

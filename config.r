@@ -74,5 +74,5 @@ ordinal_columns <- c(
 # Boxplot booleans
 boxplot_booleans <- c(
   "partially_thin_or_immersed", "areole_crack_regularity",
-  "form_regular", "form_aggregated"
+  "form_regular", "form_aggregated", "cyanobacteria"
 )

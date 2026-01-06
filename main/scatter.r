@@ -101,6 +101,55 @@ generate_jittered_boxplot(
 )
 dev.off()
 
+# --------------------------------------
+# Length / width ratio per spore
+# --------------------------------------
+
+ratio_columns <- paste0("spore_", 1:10, "_ratio")
+
+spore_data_with_ratio <- spore_data_filtered
+
+for (i in 1:10) {
+  length_col <- paste0("spore_", i, "_length")
+  width_col  <- paste0("spore_", i, "_width")
+  ratio_col  <- paste0("spore_", i, "_ratio")
+
+  spore_data_with_ratio[[ratio_col]] <-
+    spore_data_with_ratio[[length_col]] /
+    spore_data_with_ratio[[width_col]]
+}
+
+spore_ratios <- spore_data_with_ratio[, c("clade", ratio_columns)]
+
+spore_ratios_long <- data.frame(
+  clade = rep(spore_ratios$clade, each = length(ratio_columns)),
+  ratio = as.vector(t(spore_ratios[, ratio_columns]))
+)
+
+# Optional: drop NA / infinite ratios (recommended)
+spore_ratios_long <- subset(
+  spore_ratios_long,
+  is.finite(ratio)
+)
+
+png(
+  "output/boxplots/jittered_boxplot_spore_length_width_ratio.png",
+  width = 800,
+  height = 800
+)
+
+generate_jittered_boxplot(
+  spore_ratios_long,
+  clade,
+  ratio,
+  "Clade",
+  "Length / Width ratio",
+  "Spore length-to-width ratio by clade"
+)
+
+dev.off()
+
+
 #--------------------------------------
 # Generate barcharts from caloplaca data
 #--------------------------------------

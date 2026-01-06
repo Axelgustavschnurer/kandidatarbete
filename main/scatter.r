@@ -21,6 +21,10 @@ length_columns <- c("spore_1_length", "spore_2_length", "spore_3_length",
                     "spore_4_length", "spore_5_length", "spore_6_length",
                     "spore_7_length", "spore_8_length", "spore_9_length",
                     "spore_10_length")
+septa_columns <- c("spore_1_septa", "spore_2_septa", "spore_3_septa",
+                    "spore_4_septa", "spore_5_septa", "spore_6_septa",
+                    "spore_7_septa", "spore_8_septa", "spore_9_septa",
+                    "spore_10_septa")
 
 spore_widths <- spore_data_filtered[, c("clade", width_columns)]
 spore_lengths <- spore_data_filtered[, c("clade", length_columns)]
@@ -145,6 +149,54 @@ generate_jittered_boxplot(
   "Clade",
   "Length / Width ratio",
   "Spore length-to-width ratio by clade"
+)
+
+dev.off()
+
+# --------------------------------------
+# Length / septa ratio per spore
+# --------------------------------------
+
+ratio_ls_columns <- paste0("spore_", 1:10, "_length_septa_ratio")
+
+spore_data_with_ls_ratio <- spore_data_filtered
+
+for (i in 1:10) {
+  length_col <- paste0("spore_", i, "_length")
+  septa_col  <- paste0("spore_", i, "_septa")
+  ratio_col  <- paste0("spore_", i, "_length_septa_ratio")
+
+  spore_data_with_ls_ratio[[ratio_col]] <-
+    spore_data_with_ls_ratio[[length_col]] /
+    spore_data_with_ls_ratio[[septa_col]]
+}
+
+spore_ls_ratios <- spore_data_with_ls_ratio[, c("clade", ratio_ls_columns)]
+
+spore_ls_ratios_long <- data.frame(
+  clade = rep(spore_ls_ratios$clade, each = length(ratio_ls_columns)),
+  ratio = as.vector(t(spore_ls_ratios[, ratio_ls_columns]))
+)
+
+# Remove NA, infinite, and zero-septa artifacts
+spore_ls_ratios_long <- subset(
+  spore_ls_ratios_long,
+  is.finite(ratio)
+)
+
+png(
+  "output/boxplots/jittered_boxplot_spore_length_septa_ratio.png",
+  width = 800,
+  height = 800
+)
+
+generate_jittered_boxplot(
+  spore_ls_ratios_long,
+  clade,
+  ratio,
+  "Clade",
+  "Length / septa ratio",
+  "Spore length-to-septa ratio by clade"
 )
 
 dev.off()

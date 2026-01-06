@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/proj4@2.9.0/dist/proj4.js"></script>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    #map {
+      height: 100dvh;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="map"></div>
+  <script>
+    const map = L.map('map').setView([59.3327, 18.0656], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+  </script>
+  <script>
+
+    function addLatitudeLine(lat, color = 'black', weight = 1, opacity = 0.5) {
+      // Horizontal line spans entire globe
+      const line = L.polyline([[lat, -180], [lat, 180]], {
+        color: color,
+        weight: weight,
+        opacity: opacity,
+        dashArray: '4,4' // optional dashed line
+      }).addTo(map);
+
+      // Optional label
+      line.bindTooltip(`${lat.toFixed(2)}°N`, {
+        permanent: true,
+        direction: 'right',
+        offset: [5, 0]
+      });
+    }
+
+    async function loadCSV() {
+      proj4.defs(
+        "EPSG:3021",
+        "+proj=tmerc +lat_0=0 +lon_0=15.8062845294444 +k=1.00000561024 +x_0=1500000 +y_0=0 +ellps=bessel +units=m +no_defs"
+      );
+
+
+      const rt90 = "EPSG:3021";
+      const wgs84 = "EPSG:4326";
+
+      const response = await fetch('../data/caloplaca_exsecuta.csv');
+      const text = await response.text();
+
+      const lines = text.trim().split('\n');
+      const delimiter = lines[0].includes(';') ? ';' : ',';
+
+      const headers = lines[0]
+        .replace('\ufeff', '')
+        .split(delimiter)
+        .map(h => h.trim());
+
+      const rows = lines.slice(1);
+      const bounds = L.latLngBounds();
+
+      rows.forEach(line => {
+        console.log(line)
+        const values = line.split(delimiter).map(v => v.trim());
+
+        const clade = values[headers.indexOf('clade')];
+        const north = parseFloat(values[headers.indexOf('coordinates_north')]);
+        const east = parseFloat(values[headers.indexOf('coordinates_east')]);
+
+        if (isNaN(north) || isNaN(east)) return;
+
+        // Reproject: [east, north] → [lng, lat]
+        const [lng, lat] = proj4(rt90, wgs84, [east, north]);
+
+        bounds.extend([lat, lng]);
+
+        let marker;
+
+        switch (clade) {
+          case '1':
+            marker = L.circleMarker([lat, lng], {
+              radius: 5,
+              fillColor: 'red',
+              color: '#191919',
+              weight: 1,
+              fillOpacity: 1
+            }).addTo(map);
+            break;
+
+          case '2':
+            marker = L.circleMarker([lat, lng], {
+              radius: 5,
+              fillColor: 'blue',
+              color: '#191919',
+              weight: 1,
+              fillOpacity: 1
+            }).addTo(map);
+            break;
+
+          case '3':
+            marker = L.circleMarker([lat, lng], {
+              radius: 5,
+              fillColor: 'green',
+              color: '#191919',
+              weight: 1,
+              fillOpacity: 1
+            }).addTo(map);
+            break;
+
+          default:
+            marker = L.circleMarker([lat, lng], {
+              radius: 5,
+              fillColor: 'gray',
+              color: 'transparent',
+              weight: 1,
+              fillOpacity: 0
+            }).addTo(map);
+        }
+      });
+
+      for (let lat = 55; lat <= 70; lat += 2) {
+        addLatitudeLine(lat, '#393939', 1, 0.5);
+      }
+
+    }
+
+    loadCSV();
+
+
+  </script>
+</body>
+
+</html>

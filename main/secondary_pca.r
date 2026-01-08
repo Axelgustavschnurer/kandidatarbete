@@ -1,7 +1,7 @@
 # 1. Filter data
-# 2. Run intial PCA (Save graph to /output/intial_pca)
-# 3. Run parallel analysis (Save graph to /output/intial_pca)
-# 4. Generate output (Save text to /output/intial_pca)
+# 2. Run intial PCA (Save graph to /output/secondary_pca)
+# 3. Run parallel analysis (Save graph to /output/secondary_pca)
+# 4. Generate output (Save text to /output/secondary_pca)
 
 library(psych)
 source("functions/utils.r")

@@ -1,10 +1,12 @@
+# Generate boxplots and barcharts for relevant characters and saves them as pngs
+
 source("functions/utils.r")
 source("config.r")
 
 generate_directories()
 
 #--------------------------------------
-# Generate boxplots from spore data
+# Generate boxplots
 #--------------------------------------
 
 spore_data_raw <- read.csv("data/spores.csv")
@@ -29,18 +31,18 @@ septa_columns <- c("spore_1_septa", "spore_2_septa", "spore_3_septa",
 spore_widths <- spore_data_filtered[, c("clade", width_columns)]
 spore_lengths <- spore_data_filtered[, c("clade", length_columns)]
 
-spore_widths_long <- data.frame( # TODO: What does "long" even mean
+spore_widths_long <- data.frame( 
   clade = rep(spore_widths$clade, each = length(width_columns)),
   width = as.vector(t(spore_widths[, width_columns]))
 )
-spore_lengths_long <- data.frame( # TODO: What does "long" even mean
+spore_lengths_long <- data.frame( 
   clade = rep(spore_lengths$clade, each = length(length_columns)),
   width = as.vector(t(spore_lengths[, length_columns]))
 )
 
 
 png(
-  "output/boxplots/jittered_boxplot_spore_width.png",
+  "output/character_graphs/jittered_boxplot_spore_width.png",
   width = 800,
   height = 800
 )
@@ -54,7 +56,7 @@ generate_jittered_boxplot(
 )
 dev.off()
 png(
-  "output/boxplots/jittered_boxplot_spore_length.png",
+  "output/character_graphs/jittered_boxplot_spore_length.png",
   width = 800,
   height = 800
 )
@@ -68,7 +70,6 @@ generate_jittered_boxplot(
 )
 dev.off()
 
-
 caloplaca_data_raw <- read.csv("data/caloplaca_exsecuta.csv")
 
 caloplaca_data_subset <- subset(
@@ -77,7 +78,7 @@ caloplaca_data_subset <- subset(
 )
 
 png(
-  "output/boxplots/jittered_boxplot_amount.png",
+  "output/character_graphs/jittered_boxplot_amount.png",
   width = 800,
   height = 800
 )
@@ -90,8 +91,9 @@ generate_jittered_boxplot(
   "Amount of apothecia by clade"
 )
 dev.off()
+
 png(
-  "output/boxplots/jittered_boxplot_max_areole_diamater.png",
+  "output/character_graphs/jittered_boxplot_max_areole_diamater.png",
   width = 800,
   height = 800
 )
@@ -104,10 +106,6 @@ generate_jittered_boxplot(
   "Max areole diameter by clade"
 )
 dev.off()
-
-# --------------------------------------
-# Length / width ratio per spore
-# --------------------------------------
 
 ratio_columns <- paste0("spore_", 1:10, "_ratio")
 
@@ -130,14 +128,13 @@ spore_ratios_long <- data.frame(
   ratio = as.vector(t(spore_ratios[, ratio_columns]))
 )
 
-# Optional: drop NA / infinite ratios (recommended)
 spore_ratios_long <- subset(
   spore_ratios_long,
   is.finite(ratio)
 )
 
 png(
-  "output/boxplots/jittered_boxplot_spore_length_width_ratio.png",
+  "output/character_graphs/jittered_boxplot_spore_length_width_ratio.png",
   width = 800,
   height = 800
 )
@@ -153,9 +150,6 @@ generate_jittered_boxplot(
 
 dev.off()
 
-# --------------------------------------
-# Length / septa ratio per spore
-# --------------------------------------
 
 ratio_ls_columns <- paste0("spore_", 1:10, "_length_septa_ratio")
 
@@ -178,14 +172,13 @@ spore_ls_ratios_long <- data.frame(
   ratio = as.vector(t(spore_ls_ratios[, ratio_ls_columns]))
 )
 
-# Remove NA, infinite, and zero-septa artifacts
 spore_ls_ratios_long <- subset(
   spore_ls_ratios_long,
   is.finite(ratio)
 )
 
 png(
-  "output/boxplots/jittered_boxplot_spore_length_septa_ratio.png",
+  "output/character_graphs/jittered_boxplot_spore_length_septa_ratio.png",
   width = 800,
   height = 800
 )
@@ -201,7 +194,6 @@ generate_jittered_boxplot(
 
 dev.off()
 
-
 #--------------------------------------
 # Generate barcharts from caloplaca data
 #--------------------------------------
@@ -216,22 +208,13 @@ caloplaca_data_subset <- subset(
 caloplaca_data_filtered <- caloplaca_data_subset |>
   convert_boolean_numeric()
 
-# Example data
 for (col_name in boxplot_booleans) {
-
-  # Remove rows where current column is NA
   df <- caloplaca_data_filtered[!is.na(caloplaca_data_filtered[[col_name]]), ]
-
-  # Create a small dataframe with clade + current column
   plot_df <- data.frame(
     clade = df$clade,
     value = df[[col_name]]
   )
-
-  # Construct output filename
-  filename <- paste0("output/boxplots/barchart_", col_name, ".png")
-
-  # Save plot
+  filename <- paste0("output/character_graphs/barchart_", col_name, ".png")
   png(filename, width = 800, height = 800)
   generate_true_false_barchart(
     data = plot_df,

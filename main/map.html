@@ -33,15 +33,13 @@
   <script>
 
     function addLatitudeLine(lat, color = 'black', weight = 1, opacity = 0.5) {
-      // Horizontal line spans entire globe
       const line = L.polyline([[lat, -180], [lat, 180]], {
         color: color,
         weight: weight,
         opacity: opacity,
-        dashArray: '4,4' // optional dashed line
+        dashArray: '4,4'
       }).addTo(map);
 
-      // Optional label
       line.bindTooltip(`${lat.toFixed(2)}°N`, {
         permanent: true,
         direction: 'right',
@@ -83,7 +81,6 @@
 
         if (isNaN(north) || isNaN(east)) return;
 
-        // Reproject: [east, north] → [lng, lat]
         const [lng, lat] = proj4(rt90, wgs84, [east, north]);
 
         bounds.extend([lat, lng]);

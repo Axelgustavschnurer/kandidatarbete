@@ -4,7 +4,7 @@ directories <- c(
   "output/initial_pca",
   "output/hypothesis_tests",
   "output/secondary_pca",
-  "output/boxplots"
+  "output/character_graphs"
 )
 
 # Codes for shapes representing different clades

@@ -353,6 +353,9 @@ run_wilcox <- function(data, group_col = "clade") {
   return(res)
 }
 
+
+# TODO: Rename this function (It is currently a bit
+# missleading as it has nothing to do with a PCA).
 # We use it for statistical tests to remove missing values
 # and convert values to booleans if needed
 prepare_pca_data <- function(dataframe, columns, convert = TRUE) {

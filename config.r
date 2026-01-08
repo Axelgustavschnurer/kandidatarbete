@@ -1,3 +1,5 @@
+# Various configurations used throughout the projects
+
 # Output directories
 directories <- c(
   "output",

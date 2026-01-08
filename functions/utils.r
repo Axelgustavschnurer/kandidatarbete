@@ -1,8 +1,9 @@
+# Various functions used throughout other files
+
 library("ggplot2")
 source("config.r")
 
 # Generate output directories
-
 generate_directories <- function() {
   for (directory in directories) {
     if (!dir.exists(directory)) {
@@ -18,7 +19,7 @@ convert_boolean_numeric <- function(dataframe) {
     if (is.logical(column)) as.numeric(column) else column
   })
 
-  return(dataframe) # nolint
+  return(dataframe)
 }
 
 # Convert missing values in a dataframe to the mean value for that column.
@@ -28,10 +29,10 @@ convert_na_mean <- function(dataframe) {
       column[is.na(column)] <- mean(column, na.rm = TRUE)
     }
 
-    return(column) # nolint
+    return(column)
   })
 
-  return(dataframe) # nolint
+  return(dataframe)
 }
 
 # Generates a boxplot with jittered points
@@ -79,22 +80,19 @@ generate_true_false_barchart <- function(
   y_axis_label,
   title
 ) {
-  # Capture variable names properly
   group_name <- deparse(substitute(group_var))
   value_name <- deparse(substitute(value_var))
 
-  # Count TRUE (1) per group
   true_counts <- tapply(data[[value_name]] == 1, data[[group_name]], sum, na.rm = TRUE)
-  # Count FALSE (0) per group
   false_counts <- tapply(data[[value_name]] == 0, data[[group_name]], sum, na.rm = TRUE)
 
   counts <- rbind(`True` = true_counts, `False` = false_counts)
-  
+
   # Generate barplot
   barplot(
     counts,
-    beside = TRUE,  # set to FALSE for stacked bars
-    col = c("#4CAF50", "#F44336"), # green/red for true/false
+    beside = TRUE,
+    col = c("#4CAF50", "#F44336"),
     border = "gray30",
     main = title,
     xlab = x_axis_label,
@@ -104,8 +102,7 @@ generate_true_false_barchart <- function(
   )
 }
 
-
-
+# Generates a biplot based on PCA results
 generate_biplot <- function(
   title,
   df,
@@ -209,17 +206,18 @@ generate_biplot <- function(
     size = 3
   )
 
-  # Centering at 0,0: symmetric axis limits
+  # Center at 0,0
   x_range <- range(plot_data[[pc_x]], 0)
   y_range <- range(plot_data[[pc_y]], 0)
   x_max <- max(abs(x_range))
   y_max <- max(abs(y_range))
 
-  margin_abs <- 0  # Margin for border
+  # Add margins
+  margin_abs <- 0  
   x_lim_expanded <- c(-x_max - margin_abs, x_max + margin_abs)
   y_lim_expanded <- c(-y_max - margin_abs, y_max + margin_abs)
 
-  # Final plot adjustments
+  # Final plot
   plot +
     ggtitle(title) +
     xlab(paste0(
@@ -301,7 +299,6 @@ run_anova <- function(data, group_col = "clade") {
 # Only the fisher function deals with invalid values.
 # This is because it was the only relevant place to deal with them
 # for this project.
-# For future use all functions should be written to handle this case.
 run_fisher <- function(data, group_col = "clade") {
   cols_to_test <- setdiff(names(data), group_col)
 
@@ -356,28 +353,6 @@ run_wilcox <- function(data, group_col = "clade") {
   return(res)
 }
 
-# TODO: Probably remove this function :)
-print_pvalues_table <- function(pvalues, title = "P-values") {
-
-  if (is.list(pvalues)) {
-    pvalues <- unlist(pvalues)
-  }
-
-  # Sort by p-value
-  sorted <- sort(pvalues)
-
-  cat("\n", title, "\n", sep = "")
-  cat(strrep("-", 40), "\n")
-  cat(sprintf("%-30s %8s\n", "Variable", "P-Value all"))
-  cat(strrep("-", 40), "\n")
-
-  for (i in seq_along(sorted)) {
-    cat(sprintf("%-30s %8.4f\n", names(sorted)[i], sorted[[i]]))
-  }
-  cat(strrep("-", 40), "\n")
-}
-
-# TODO: Rename this function
 # We use it for statistical tests to remove missing values
 # and convert values to booleans if needed
 prepare_pca_data <- function(dataframe, columns, convert = TRUE) {
